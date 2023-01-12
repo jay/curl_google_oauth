@@ -79,7 +79,9 @@ if(defined($datadir)) {
 open(my $lockfh, ">>", $lockfile) or die "failed opening $lockfile : $!";
 if(!flock($lockfh, LOCK_EX | LOCK_NB)) {
   print "waiting for lock on $lockfile (is another instance running?)\n";
-  flock($lockfh, LOCK_EX) or die "failed waiting for lock on $lockfile";
+  while(!flock($lockfh, LOCK_EX | LOCK_NB)) {
+    sleep(1);
+  }
 }
 
 my $port = 7777;
