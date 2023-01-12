@@ -29,7 +29,9 @@ $ ./bearer-refresh.pl && curl -sS -K bearer.cfg https://www.googleapis.com/gmail
 2
 ~~~
 
-# Scripts
+# Script directory
+
+The script directory is the directory of this README file.
 
 ## bearer-new.pl
 
@@ -78,24 +80,28 @@ You would have to request new token info by running bearer-new.pl again.
 
 https://developers.google.com/identity/protocols/oauth2#expiration
 
-## start-auth-url.bat
-
-start-auth-url.bat is a helper script for Windows that is called by
-bearer-new.pl to launch the URL for Google's interactive confirmation in the
-user's default browser. There is no reason to run this script directly.
-
 ## shared.pl
 
 shared.pl contains shared variables and functions used by bearer-new.pl and
 bearer-refresh.pl. There is no reason to run this script directly.
 
-# Data files
+# Data directory
+
+The main scripts bearer-new.pl and bearer-refresh.pl accept option
+`--datadir <path>` to set the directory for the data files. The script will
+chdir to the directory on startup. The default is the current directory.
+
+## auth-url.bat
+
+auth-url.bat is a Windows helper script that may be created by bearer-new.pl to
+open the Google interactive authorization URL from auth-url.txt in the user's
+default browser. There is no reason to run this script directly.
 
 ## auth-url.txt
 
-auth-url.txt contains the interactive authorization URL. This file is created
-by bearer-new.pl and the URL in the file should open in your browser during
-authorization.
+auth-url.txt contains the Google interactive authorization URL. This file is
+created by bearer-new.pl and the URL in the file should open in your browser
+during authorization.
 
 Troubleshooting: If the URL failed to open in your browser you can either copy
 it from the terminal or this file and paste it into the browser, while
@@ -180,7 +186,10 @@ will error if it is not set to bearer.
 
 token.lock is used to handle contention of multiple running scripts. The
 scripts wait for an exclusive lock on the file so that only one instance can
-run at one time.
+run at one time. bearer-new.pl and bearer-refresh.pl may create this file.
+
+Once created this file is persistent and its existence should not be used as an
+indicator of whether or not the lock is in use.
 
 # Other
 

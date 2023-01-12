@@ -24,14 +24,57 @@ use Data::Dumper;
 use Fcntl qw(:flock);
 use File::Basename;
 use File::Spec;
+use Getopt::Long;
 use IO::Socket;
 
-my $path = dirname(File::Spec->rel2abs(__FILE__));
-(defined($path) && $path ne "") || die "this script's path not found";
-chdir($path) or die "chdir(\"$path\") failed: $!";
+my $dirname = dirname(File::Spec->rel2abs(__FILE__));
+(defined($dirname) && $dirname ne "") || die "this script's path not found";
+
+my $shared = File::Spec->catfile($dirname, "shared.pl");
+(-e $shared) || die "shared.pl path not found: $shared";
 
 our ($verbose,$rntimeout,$cfgfile,$lockfile,$tokenfile,$tmpfile,$tmpfile2);
-do "./shared.pl" or die "perl couldn't parse shared.pl";
+do "$shared" or die "perl couldn't parse shared.pl";
+
+my $datadir;
+
+sub help() {
+  my $helptext = '
+This script requests new oauth token information from Google.
+
+The token info is written to token.json. The new bearer token is extracted
+from token.json, formatted as curl command line option --oauth2-bearer and
+written to a curl configuration file bearer.cfg which can be passed to curl.
+
+It is recommended to run ./bearer-refresh.pl to refresh the token if it has
+expired, before running curl:
+
+./bearer-refresh.pl && \
+curl -sS -K bearer.cfg https://www.googleapis.com/gmail/... | jq ...
+
+Options:
+  --datadir <path>
+                The directory for the data files.
+                The script will chdir to the directory on startup.
+                Default: The current directory.
+  --verbose
+                Talkative to error stream (eg stderr).
+                Currently this option just affects curl.
+';
+  $helptext =~ s/\r$//gm;
+  print $helptext;
+  exit;
+}
+
+GetOptions(
+  "datadir=s" => \$datadir,
+  "help|?" => \&help,
+  "verbose" => \$verbose
+) or die;
+
+if(defined($datadir)) {
+  chdir($datadir) or die "chdir(\"$datadir\") failed: $!";
+}
 
 open(my $lockfh, ">>", $lockfile) or die "failed opening $lockfile : $!";
 if(!flock($lockfh, LOCK_EX | LOCK_NB)) {
@@ -68,16 +111,34 @@ sub open_browser_url(@) {
   my $cmd;
 
   if($^O =~ /^(?:cygwin|mingw|mswin|msys)/i) { # Windows
+    my $batfile = "auth-url.bat";
+    # batch should always use CRLF line endings due to LF-only batch bugs
+    open(my $bat_fh, ">:crlf", $batfile)
+      or die "failed opening $batfile : $!";
+my $batcontent = '
+@echo off
+setlocal disabledelayedexpansion
+::
+:: This script was created by bearer-new.pl to open the Google interactive
+:: authorization URL in the user\'s default browser.
+::
+set /p URL=<"./' . $urlfile . '"' . '
+start "" "%URL%"
+';
+    $batcontent =~ s/\r$//gm; # strip unlikely CR so it's not written as CRCRLF
+    print $bat_fh $batcontent or die "failed writing to $batfile : $!\n";
+    close($bat_fh) or die "failed closing $batfile : $!\n";
+
     if($^O =~ /^msys/i) {
-      # old msys will try to reinterpret leading single / as path
+      # old msys will change argument starting with single / to a path
       # https://stackoverflow.com/q/7250130
       $cmd = "cmd //c ";
     }
     else {
       $cmd = "cmd /c ";
     }
-    $cmd .= "start-auth-url.bat";
-  }
+    $cmd .= "\"$batfile\"";
+ }
   else {
     $cmd = "xdg-home \"$url\"";
   }

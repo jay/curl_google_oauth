@@ -26,14 +26,17 @@ use File::Basename;
 use File::Spec;
 use Getopt::Long;
 
-my $path = dirname(File::Spec->rel2abs(__FILE__));
-(defined($path) && $path ne "") || die "this script's path not found";
-chdir($path) or die "chdir(\"$path\") failed: $!";
+my $dirname = dirname(File::Spec->rel2abs(__FILE__));
+(defined($dirname) && $dirname ne "") || die "this script's path not found";
+
+my $shared = File::Spec->catfile($dirname, "shared.pl");
+(-e $shared) || die "shared.pl path not found: $shared";
 
 our ($verbose,$rntimeout,$cfgfile,$lockfile,$tokenfile,$tmpfile,$tmpfile2);
-do "./shared.pl" or die "perl couldn't parse shared.pl";
+do "$shared" or die "perl couldn't parse shared.pl";
 
 my $start_time = time;
+my $datadir;
 my $early = 5 * 60;
 my $maxwait = 5 * 60;
 my $force;
@@ -58,6 +61,10 @@ Options:
                 0 disables early refresh.
                 Optional suffix \'s\' seconds (default), \'m\' minutes.
                 Default: ' . $early . ' (' . ($early/60) . ' minutes).
+  --datadir <path>
+                The directory for the data files.
+                The script will chdir to the directory on startup.
+                Default: The current directory.
   --force
                 Refresh the token regardless of expiration.
   --max-transfer-time <duration>
@@ -82,6 +89,7 @@ atomically and each replacement tried for up to ' . $rntimeout . ' seconds.
 }
 
 GetOptions(
+  "datadir=s" => \$datadir,
   "early=s" => \$early,
   "force" => \$force,
   "help|?" => \&help,
@@ -94,6 +102,10 @@ for((\$early,\$maxwait)) {
   ($$_ =~ s/^(\d+)s$/$1/) ||
   ($$_ =~ /^(\d+)$/) ||
   die "option value invalid time duration of $$_";
+}
+
+if(defined($datadir)) {
+  chdir($datadir) or die "chdir(\"$datadir\") failed: $!";
 }
 
 sub checkwait() { (!$maxwait || time <= $start_time + $maxwait) }
