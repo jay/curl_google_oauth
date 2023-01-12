@@ -40,6 +40,7 @@ my $datadir;
 my $early = 5 * 60;
 my $maxwait = 5 * 60;
 my $force;
+my $quiet;
 
 sub help() {
   my $helptext = '
@@ -72,6 +73,9 @@ Options:
                 0 disables max transfer time. See remarks.
                 Optional suffix \'s\' seconds (default), \'m\' minutes.
                 Default: ' . $maxwait . ' (' . ($maxwait/60) . ' minutes).
+  --quiet
+                Do not write to stdout.
+                Error messages will still be written to stderr.
   --verbose
                 Talkative to error stream (eg stderr).
                 Currently this option just affects curl.
@@ -94,8 +98,16 @@ GetOptions(
   "force" => \$force,
   "help|?" => \&help,
   "max-transfer-time=s" => \$maxwait,
+  "quiet" => \$quiet,
   "verbose" => \$verbose
 ) or die;
+
+my $nul_fh;
+if($quiet) {
+  my $nulfile = File::Spec->devnull();
+  open($nul_fh, ">", $nulfile) or die "failed opening $nulfile : $!";
+  select $nul_fh;
+}
 
 for((\$early,\$maxwait)) {
   ($$_ =~ s/^(\d+)m$/($1*60)/e) ||

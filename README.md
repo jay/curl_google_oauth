@@ -25,7 +25,7 @@ received token data
 updating bearer.cfg and token.json
 token data written to bearer.cfg and token.json
 
-$ ./bearer-refresh.pl && curl -sS -K bearer.cfg https://www.googleapis.com/gmail/v1/users/me/labels/INBOX | jq .messagesUnread
+$ ./bearer-refresh.pl --quiet && curl -sS -K bearer.cfg https://www.googleapis.com/gmail/v1/users/me/labels/INBOX | jq .messagesUnread
 2
 ~~~
 
@@ -55,7 +55,7 @@ it's expired.
 Example:
 
 ~~~
-./bearer-refresh.pl && \
+./bearer-refresh.pl --quiet && \
 curl -sS -K bearer.cfg https://www.googleapis.com/gmail/... | jq ...
 ~~~
 
