@@ -112,11 +112,11 @@ bearer-new.pl is running, to continue the authorization process.
 bearer.cfg contains the bearer token formatted as curl configuration option
 [`--oauth2-bearer <token>`](https://curl.se/docs/manpage.html#--oauth2-bearer).
 You can pass it to curl as a configuration file, eg curl -K bearer.cfg, to
-use the bearer token with Google's REST API.
+use the bearer token with Google's REST API. bearer-new.pl and
+bearer-refresh.pl create this file.
 
-bearer-new.pl and bearer-refresh.pl create this file. Typically you would run
-bearer-refresh.pl so that the bearer token can be updated first if necessary,
-then run curl.
+Typically before running curl you would run bearer-refresh.pl so that if the
+bearer token has expired or is about to expire it can be updated first.
 
 ## credential.txt
 
