@@ -64,6 +64,10 @@ The script also refreshes a bearer token that is close to expiration (default:
 the same time then they wait (default: 5 minutes) for an exclusive lock. Run
 `./bearer-refresh.pl --help` for options.
 
+From what I've observed when the token info is refreshed Google responds with
+a different bearer token. In other words, ***Google will not extend the
+expiration of an existing bearer token it just generates a new one.***
+
 The token info files token.json and bearer.cfg are updated via file rename,
 which is usually atomic depending on your OS and underlying file system. On
 Windows a file cannot be replaced until all the programs (eg curl) close the
