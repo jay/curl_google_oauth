@@ -195,6 +195,15 @@ run at one time. bearer-new.pl and bearer-refresh.pl may create this file.
 Once created this file is persistent and its existence should not be used as an
 indicator of whether or not the lock is in use.
 
+# TODO
+
+## Add a revocation script
+
+I haven't written a revocation script yet, so if you need to revoke token info
+(lost, stolen etc) you'd have to 'remove access' entirely of the cloud app in
+your Google account's
+[third-party apps list](https://myaccount.google.com/permissions).
+
 # Other
 
 ## Compatibility
