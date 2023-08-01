@@ -192,6 +192,7 @@ my $response =
 "Close this tab and return to the console that is running bearer-new.pl.";
 $client->send($response);
 $client->shutdown(SHUT_RDWR);
+$data = urldecode($data);
 
 if($data !~ /^GET .*[?&]code=([0-9]\/[0-9A-Za-z_-]+).*/) {
   print STDERR "$data\n";

@@ -42,6 +42,13 @@ sub urlencode(@) {
   return $url;
 }
 
+sub urldecode(@) {
+  my ($url) = @_;
+  $url =~ s/\+/ /g;
+  $url =~ s/%([A-Fa-f\d]{2})/chr hex $1/eg;
+  return $url;
+}
+
 # On Windows a file cannot be replaced until all the programs (eg curl) close
 # the fopened file handles so we have to try harder to rename the file.
 #
