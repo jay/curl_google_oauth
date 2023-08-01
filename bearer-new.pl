@@ -140,7 +140,10 @@ start "" "%URL%"
       $cmd = "cmd /c ";
     }
     $cmd .= "\"$batfile\"";
- }
+  }
+  elsif($^O =~ /^darwin/i) {
+    $cmd = "open \"$url\"";
+  }
   else {
     $cmd = "xdg-home \"$url\"";
   }
