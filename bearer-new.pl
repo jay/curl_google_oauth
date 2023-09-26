@@ -192,17 +192,24 @@ my $response =
 "Close this tab and return to the console that is running bearer-new.pl.";
 $client->send($response);
 $client->shutdown(SHUT_RDWR);
-$data = urldecode($data);
 
-if($data !~ /^GET .*[?&]code=([0-9]\/[0-9A-Za-z_-]+).*/) {
-  print STDERR "$data\n";
+if($data !~ /^GET \S+[?&]code=([\S ]+?)(?:&[\S ]+)? HTTP\/\d+\.\d+\r?\n/) {
+  print STDERR "\n$data\n";
   die "authorization code not found";
+}
+
+my $code = urldecode($1);
+
+if($code !~ /^[0-9]\/[0-9A-Za-z_-]+\z/) {
+  print STDERR "\n$data\n";
+  print STDERR "authorization code (URL-decoded): $code\n";
+  die "authorization code unknown format";
 }
 
 print "received authorization code\n";
 
 my $postdata =
-"code=" . urlencode($1) . "&" .
+"code=" . urlencode($code) . "&" .
 "client_id=" . urlencode($cred->{client_id}) . "&" .
 "client_secret=" . urlencode($cred->{client_secret}) . "&" .
 "redirect_uri=" . urlencode("http://$srvaddr") . "&" .
