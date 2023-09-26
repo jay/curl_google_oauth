@@ -145,7 +145,7 @@ start "" "%URL%"
     $cmd = "open \"$url\"";
   }
   else {
-    $cmd = "xdg-home \"$url\"";
+    $cmd = "xdg-open \"$url\"";
   }
 
   defined(my $pid = fork) or die "failed to fork";
