@@ -7,7 +7,7 @@ Quick Start
 -----------
 
 ~~~
-cat > credential.txt << EOF
+cat > credential.txt << 'EOF'
 client_id = REMOVED.apps.googleusercontent.com
 client_secret = REMOVED
 scope = https://mail.google.com/
